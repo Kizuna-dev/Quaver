@@ -486,7 +486,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             foreach (var lane in ActiveNoteLanes)
             {
                 foreach (var hitObject in lane)
-                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition, hitObject.Info.Lane - 1);
             }
         }
 
@@ -564,7 +564,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             foreach (var lane in HeldLongNoteLanes)
             {
                 foreach (var hitObject in lane)
-                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition, lane.Count);
             }
         }
 
@@ -642,7 +642,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             {
                 foreach (var hitObject in lane)
                 {
-                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition, lane.Count);
                 }
             }
         }
@@ -659,11 +659,11 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             for (var i = 0; i < ActiveNoteLanes.Count; i++)
             {
                 foreach (var hitObject in ActiveNoteLanes[i])
-                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition, i);
                 foreach (var hitObject in DeadNoteLanes[i])
-                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition, i);
                 foreach (var hitObject in HeldLongNoteLanes[i])
-                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition, i);
             }
         }
 
@@ -699,7 +699,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             if (lane.Count > 0)
             {
                 var info = lane.Dequeue();
-                gameplayHitObject.InitializeObject(this, info);
+                gameplayHitObject.InitializeObject(this, info, gameplayHitObject.Info.Lane);
                 ActiveNoteLanes[info.Lane - 1].Enqueue(gameplayHitObject);
             }
             else

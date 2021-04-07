@@ -269,6 +269,7 @@ namespace Quaver.Shared.Screens.Editor.UI.Rulesets.Keys
             switch (GameplayRulesetKeys.ScrollDirection)
             {
                 case ScrollDirection.Split:
+                case ScrollDirection.Intralism:
                 case ScrollDirection.Down:
                     ScrollContainer.HitPositionLine.Y = ScrollContainer.HitPositionY;
                     break;

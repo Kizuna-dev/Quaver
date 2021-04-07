@@ -164,7 +164,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             LongNoteSizeDifference = playfield.LongNoteSizeAdjustment[lane];
 
             InitializeSprites(ruleset, lane, playfield.ScrollDirections[lane]);
-            InitializeObject(manager, info);
+            InitializeObject(manager, info, lane);
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             // Create the base HitObjectSprite
             HitObjectSprite = new Sprite()
             {
-                Alignment = Alignment.TopLeft,
+                Alignment = Alignment.MidCenter,
                 Position = new ScalableVector2(posX, 0),
                 SpriteEffect = flipNoteBody ? SpriteEffects.FlipVertically : SpriteEffects.None
             };
@@ -199,7 +199,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             var bodies = SkinManager.Skin.Keys[ruleset.Mode].NoteHoldBodies[lane];
             LongNoteBodySprite = new AnimatableSprite(bodies)
             {
-                Alignment = Alignment.TopLeft,
+                Alignment = Alignment.MidCenter,
                 Size = new ScalableVector2(laneSize , 0),
                 Position = new ScalableVector2(posX, 0),
                 Parent = playfield.Stage.HitObjectContainer
@@ -208,7 +208,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             // Create the Hold End
             LongNoteEndSprite = new Sprite()
             {
-                Alignment = Alignment.TopLeft,
+                Alignment = Alignment.MidCenter,
                 Position = new ScalableVector2(posX, 0),
                 Size = new ScalableVector2(laneSize, 0),
                 Parent = playfield.Stage.HitObjectContainer
@@ -233,7 +233,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// </summary>
         /// <param name="info"></param>
         /// <param name="manager"></param>
-        public void InitializeObject(HitObjectManagerKeys manager, HitObjectInfo info)
+        public void InitializeObject(HitObjectManagerKeys manager, HitObjectInfo info, int currentlane)
         {
             var playfield = (GameplayPlayfieldKeys)Ruleset.Playfield;
             HitPosition = info.IsLongNote ? playfield.HoldHitPositionY[info.Lane - 1] : playfield.HitPositionY[info.Lane - 1];
@@ -303,7 +303,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             InitializeHits();
 
             // Update Positions
-            UpdateSpritePositions(manager.CurrentTrackPosition, manager.CurrentVisualPosition);
+            UpdateSpritePositions(manager.CurrentTrackPosition, manager.CurrentVisualPosition, info.Lane - 1);
         }
 
         /// <summary>
@@ -356,6 +356,8 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// <returns></returns>
         public float GetSpritePosition(long offset, float initialPos) => HitPosition + ((initialPos - offset) * (ScrollDirection.Equals(ScrollDirection.Down) ? -HitObjectManagerKeys.ScrollSpeed : HitObjectManagerKeys.ScrollSpeed) / HitObjectManagerKeys.TrackRounding);
 
+        public float GetIntraSpritePosition(long offset, float initialPos, bool intraDirection) => HitPosition + ((initialPos - offset) * (intraDirection ? -HitObjectManagerKeys.ScrollSpeed : HitObjectManagerKeys.ScrollSpeed) / HitObjectManagerKeys.TrackRounding);
+
         /// <summary>
         ///     Calculates the position of the end Hit Object with a position offset.
         /// </summary>
@@ -393,7 +395,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// <summary>
         ///     Will forcibly update LN on scroll speed change or specific modifier.
         /// </summary>
-        public void ForceUpdateLongnote(long offset, double curTime)
+        public void ForceUpdateLongnote(long offset, double curTime, int currentlane)
         {
             // When LN end is not drawn, the LNs don't change their size as they are held.
             // So we only need to update if DrawLongNoteEnd is true.
@@ -401,13 +403,13 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             if (Info.IsLongNote && SkinManager.Skin.Keys[Ruleset.Mode].DrawLongNoteEnd)
                 UpdateLongNoteSize(offset, curTime);
 
-            UpdateSpritePositions(offset, curTime);
+            UpdateSpritePositions(offset, curTime, currentlane);
         }
 
         /// <summary>
         ///     Updates the HitObject sprite positions
         /// </summary>
-        public void UpdateSpritePositions(long offset, double curTime)
+        public void UpdateSpritePositions(long offset, double curTime, int currentlane)
         {
             // Update Sprite position with regards to LN's state
             //
@@ -419,18 +421,95 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
                 UpdateLongNoteSize(offset, curTime);
 
                 if (curTime > Info.StartTime)
+                {
                     spritePosition = HitPosition;
+                }
                 else
-                    spritePosition = GetSpritePosition(offset, InitialTrackPosition);
+                {
+                    if (ScrollDirection.Equals(ScrollDirection.Intralism))
+                    {
+                        switch (currentlane)
+                        {
+                            case 0:
+                                spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, true);
+                                break;
+                            case 1:
+                                spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, false);
+                                break;
+                            case 2:
+                                spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, true);
+                                break;
+                            case 3:
+                                spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, false);
+                                break;
+                            default:
+                                spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, false);
+                                break;
+                        }
+                        
+                    }
+                    else
+                    {
+                        spritePosition = GetSpritePosition(offset, InitialTrackPosition);
+                    }
+                }   
             }
             else
             {
-                spritePosition = GetSpritePosition(offset, InitialTrackPosition);
+                if (ScrollDirection.Equals(ScrollDirection.Intralism))
+                {
+                    switch (currentlane)
+                    {
+                        case 0:
+                            spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, true);
+                            break;
+                        case 1:
+                            spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, false);
+                            break;
+                        case 2:
+                            spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, true);
+                            break;
+                        case 3:
+                            spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, false);
+                            break;
+                        default:
+                            spritePosition = GetIntraSpritePosition(offset, InitialTrackPosition, false);
+                            break;
+                    }
+
+                }
+                else
+                {
+                    spritePosition = GetSpritePosition(offset, InitialTrackPosition);
+                }
             }
 
             // Update HitBody
-            HitObjectSprite.Y = spritePosition;
-
+            if (ScrollDirection.Equals(ScrollDirection.Intralism))
+            {
+                switch (currentlane)
+                {
+                    case 0:
+                        HitObjectSprite.X = spritePosition - HitObjectSprite.Size.X.Value;
+                        break;
+                    case 1:
+                        HitObjectSprite.Y = spritePosition;
+                        break;
+                    case 2:
+                        HitObjectSprite.Y = spritePosition;
+                        break;
+                    case 3:
+                        HitObjectSprite.X = spritePosition + HitObjectSprite.Size.X.Value;
+                        break;
+                    default:
+                        HitObjectSprite.Y = spritePosition;
+                        break;
+                }
+            }
+            else
+            {
+                HitObjectSprite.Y = spritePosition;
+            }
             PressHit.UpdateSpritePositions(offset);
             ReleaseHit.UpdateSpritePositions(offset);
 

@@ -257,6 +257,24 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield
                 return;
             }
 
+            if (direction.Equals(ScrollDirection.Intralism))
+            {
+                var halfIndex = (int)Math.Ceiling(keys / 2.0);
+                ScrollDirections = new ScrollDirection[keys];
+                for (var i = 0; i < keys; i++)
+                {
+                    if (i == 0)
+                        ScrollDirections[i] = ScrollDirection.Intralism;
+                    else if (i == 1)
+                        ScrollDirections[i] = ScrollDirection.Intralism;
+                    else if (i == 2)
+                        ScrollDirections[i] = ScrollDirection.Intralism;
+                    else
+                        ScrollDirections[i] = ScrollDirection.Intralism;
+                }
+                return;
+            }
+
             // Case: Config = Down/Up Scroll
             ScrollDirections = Enumerable.Repeat(direction, keys).ToArray();
         }
@@ -297,6 +315,44 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield
 
                 switch (ScrollDirections[i])
                 {
+                    case ScrollDirection.Intralism:
+                        if (i == 0)
+                        {
+                            ReceptorPositionY[i] = 0;
+                            ColumnLightingPositionY[i] = 0;
+                            HitPositionY[i] = 0;
+                            HoldHitPositionY[i] = 0;
+                            HoldEndHitPositionY[i] = 0;
+                            TimingLinePositionY[i] = 0;
+                        }
+                        else if (i == 1)
+                        {
+                            ReceptorPositionY[i] = 0;
+                            ColumnLightingPositionY[i] = 0;
+                            HitPositionY[i] = 0 + hitObOffset;
+                            HoldHitPositionY[i] = 0 + holdHitObOffset;
+                            HoldEndHitPositionY[i] = 0 + holdEndOffset;
+                            TimingLinePositionY[i] = 0;
+                        }
+                        else if (i == 2)
+                        {
+                            ReceptorPositionY[i] = 0;
+                            ColumnLightingPositionY[i] = 0;
+                            HitPositionY[i] = 0 - hitObOffset;
+                            HoldHitPositionY[i] = 0 - holdHitObOffset;
+                            HoldEndHitPositionY[i] = 0 - holdEndOffset;
+                            TimingLinePositionY[i] = 0;
+                        }
+                        else if (i == 3)
+                        {
+                            ReceptorPositionY[i] = 0;
+                            ColumnLightingPositionY[i] = 0;
+                            HitPositionY[i] = 0;
+                            HoldHitPositionY[i] = 0;
+                            HoldEndHitPositionY[i] = 0;
+                            TimingLinePositionY[i] = 0;
+                        }
+                        break;
                     case ScrollDirection.Down:
                         ReceptorPositionY[i] = WindowManager.Height - skin.ReceptorPosOffsetY - receptorOffset;
                         ColumnLightingPositionY[i] = ReceptorPositionY[i] - skin.ColumnLightingOffsetY - skin.ColumnLightingScale * LaneSize * skin.ColumnLighting.Height / skin.ColumnLighting.Width;
