@@ -164,7 +164,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             LongNoteSizeDifference = playfield.LongNoteSizeAdjustment[lane];
 
             InitializeSprites(ruleset, lane, playfield.ScrollDirections[lane]);
-            InitializeObject(manager, info);
+            InitializeObject(manager, info, lane);
         }
 
         /// <summary>
@@ -183,36 +183,74 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             var scale = ConfigManager.GameplayNoteScale.Value / 100f;
             var laneSize = playfield.LaneSize * scale;
 
-            // Create the base HitObjectSprite
-            HitObjectSprite = new Sprite()
+            if (ScrollDirection.Equals(ScrollDirection.Omni))
             {
-                Alignment = Alignment.TopLeft,
-                Position = new ScalableVector2(posX, 0),
-                SpriteEffect = flipNoteBody ? SpriteEffects.FlipVertically : SpriteEffects.None
-            };
+                // Create the base HitObjectSprite
+                HitObjectSprite = new Sprite()
+                {
+                    Alignment = Alignment.MidCenter,
+                    Position = new ScalableVector2(posX, 0),
+                    SpriteEffect = flipNoteBody ? SpriteEffects.FlipVertically : SpriteEffects.None
+                };
 
-            // Handle rotating the objects automatically
-            if (SkinManager.Skin.Keys[MapManager.Selected.Value.Mode].RotateHitObjectsByColumn)
-                HitObjectSprite.Rotation = GetObjectRotation(MapManager.Selected.Value.Mode, lane);
+                // Handle rotating the objects automatically
+                if (SkinManager.Skin.Keys[MapManager.Selected.Value.Mode].RotateHitObjectsByColumn)
+                    HitObjectSprite.Rotation = GetObjectRotation(MapManager.Selected.Value.Mode, lane);
 
-            // Create Hold Body
-            var bodies = SkinManager.Skin.Keys[ruleset.Mode].NoteHoldBodies[lane];
-            LongNoteBodySprite = new AnimatableSprite(bodies)
+                // Create Hold Body
+                var bodies = SkinManager.Skin.Keys[ruleset.Mode].NoteHoldBodies[lane];
+                LongNoteBodySprite = new AnimatableSprite(bodies)
+                {
+                    Alignment = Alignment.MidCenter,
+                    Size = new ScalableVector2(laneSize, 0),
+                    Position = new ScalableVector2(posX, 0),
+                    Parent = playfield.Stage.HitObjectContainer
+                };
+
+                // Create the Hold End
+                LongNoteEndSprite = new Sprite()
+                {
+                    Alignment = Alignment.MidCenter,
+                    Position = new ScalableVector2(posX, 0),
+                    Size = new ScalableVector2(laneSize, 0),
+                    Parent = playfield.Stage.HitObjectContainer
+                };
+            }
+            else
             {
-                Alignment = Alignment.TopLeft,
-                Size = new ScalableVector2(laneSize , 0),
-                Position = new ScalableVector2(posX, 0),
-                Parent = playfield.Stage.HitObjectContainer
-            };
+                // Create the base HitObjectSprite
+                HitObjectSprite = new Sprite()
+                {
+                    Alignment = Alignment.TopLeft,
+                    Position = new ScalableVector2(posX, 0),
+                    SpriteEffect = flipNoteBody ? SpriteEffects.FlipVertically : SpriteEffects.None
+                };
 
-            // Create the Hold End
-            LongNoteEndSprite = new Sprite()
-            {
-                Alignment = Alignment.TopLeft,
-                Position = new ScalableVector2(posX, 0),
-                Size = new ScalableVector2(laneSize, 0),
-                Parent = playfield.Stage.HitObjectContainer
-            };
+                // Handle rotating the objects automatically
+                if (SkinManager.Skin.Keys[MapManager.Selected.Value.Mode].RotateHitObjectsByColumn)
+                    HitObjectSprite.Rotation = GetObjectRotation(MapManager.Selected.Value.Mode, lane);
+
+                // Create Hold Body
+                var bodies = SkinManager.Skin.Keys[ruleset.Mode].NoteHoldBodies[lane];
+                LongNoteBodySprite = new AnimatableSprite(bodies)
+                {
+                    Alignment = Alignment.TopLeft,
+                    Size = new ScalableVector2(laneSize, 0),
+                    Position = new ScalableVector2(posX, 0),
+                    Parent = playfield.Stage.HitObjectContainer
+                };
+
+                // Create the Hold End
+                LongNoteEndSprite = new Sprite()
+                {
+                    Alignment = Alignment.TopLeft,
+                    Position = new ScalableVector2(posX, 0),
+                    Size = new ScalableVector2(laneSize, 0),
+                    Parent = playfield.Stage.HitObjectContainer
+                };
+            }
+
+            
 
             // Set long note end properties.
             LongNoteEndSprite.Image = SkinManager.Skin.Keys[ruleset.Mode].NoteHoldEnds[lane];
@@ -233,7 +271,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// </summary>
         /// <param name="info"></param>
         /// <param name="manager"></param>
-        public void InitializeObject(HitObjectManagerKeys manager, HitObjectInfo info)
+        public void InitializeObject(HitObjectManagerKeys manager, HitObjectInfo info, int currentlane)
         {
             var playfield = (GameplayPlayfieldKeys)Ruleset.Playfield;
             HitPosition = info.IsLongNote ? playfield.HoldHitPositionY[info.Lane - 1] : playfield.HitPositionY[info.Lane - 1];
@@ -290,7 +328,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
                 LongNoteEndSprite.Visible = SkinManager.Skin.Keys[Ruleset.Mode].DrawLongNoteEnd;
                 LongNoteBodySprite.Visible = true;
                 EndTrackPosition = manager.GetPositionFromTime(Info.EndTime);
-                UpdateLongNoteSize(InitialTrackPosition, Info.StartTime);
+                UpdateLongNoteSize(InitialTrackPosition, Info.StartTime, currentlane);
 
                 var flipNoteEnd = playfield.ScrollDirections[info.Lane - 1].Equals(ScrollDirection.Up) && SkinManager.Skin.Keys[MapManager.Selected.Value.Mode].FlipNoteEndImagesOnUpscroll;
                 if (HitObjectManager.IsSVNegative(info.EndTime))
@@ -303,7 +341,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             InitializeHits();
 
             // Update Positions
-            UpdateSpritePositions(manager.CurrentTrackPosition, manager.CurrentVisualPosition);
+            UpdateSpritePositions(manager.CurrentTrackPosition, manager.CurrentVisualPosition, info.Lane - 1);
         }
 
         /// <summary>
@@ -362,10 +400,15 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// <returns></returns>
         public float GetEndSpritePosition(long offset, float initialPos) => HoldEndHitPosition + ((initialPos - offset) * (ScrollDirection.Equals(ScrollDirection.Down) ? -HitObjectManagerKeys.ScrollSpeed : HitObjectManagerKeys.ScrollSpeed) / HitObjectManagerKeys.TrackRounding);
 
+
+        public float GetHorizontalSpritePosition(long offset, float initialPos, bool OmniDirection) => HitPosition + ((initialPos - offset) * (OmniDirection ? -HitObjectManagerKeys.ScrollSpeed : HitObjectManagerKeys.ScrollSpeed) / HitObjectManagerKeys.TrackRounding);
+
+        public float GetHorizontalEndSpritePosition(long offset, float initialPos, bool OmniDirection) => HoldEndHitPosition + ((initialPos - offset) * (OmniDirection ? -HitObjectManagerKeys.ScrollSpeed : HitObjectManagerKeys.ScrollSpeed) / HitObjectManagerKeys.TrackRounding);
+
         /// <summary>
         ///     Updates the earliest and latest track positions as well as the current LN body size.
         /// </summary>
-        public void UpdateLongNoteSize(long offset, double curTime)
+        public void UpdateLongNoteSize(long offset, double curTime, int currentlane)
         {
             var startPosition = InitialTrackPosition;
             if (curTime >= Info.StartTime)
@@ -393,30 +436,32 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// <summary>
         ///     Will forcibly update LN on scroll speed change or specific modifier.
         /// </summary>
-        public void ForceUpdateLongnote(long offset, double curTime)
+        public void ForceUpdateLongnote(long offset, double curTime, int currentlane)
         {
             // When LN end is not drawn, the LNs don't change their size as they are held.
             // So we only need to update if DrawLongNoteEnd is true.
             // The IsLongNote check is because UpdateLongNoteSize uses a property that is only initialized for LNs.
             if (Info.IsLongNote && SkinManager.Skin.Keys[Ruleset.Mode].DrawLongNoteEnd)
-                UpdateLongNoteSize(offset, curTime);
+                UpdateLongNoteSize(offset, curTime, currentlane);
 
-            UpdateSpritePositions(offset, curTime);
+            UpdateSpritePositions(offset, curTime, currentlane);
         }
 
         /// <summary>
         ///     Updates the HitObject sprite positions
         /// </summary>
-        public void UpdateSpritePositions(long offset, double curTime)
+        public void UpdateSpritePositions(long offset, double curTime, int currentlane)
         {
             // Update Sprite position with regards to LN's state
             //
             // If the LN end is not drawn, don't move the LN start up with time since it ends up sliding above the LN in
             // the end.
             float spritePosition;
+            var spritePositionX = 0f;
+            var spritePositionY = 0f;
             if (CurrentlyBeingHeld && SkinManager.Skin.Keys[Ruleset.Mode].DrawLongNoteEnd)
             {
-                UpdateLongNoteSize(offset, curTime);
+                UpdateLongNoteSize(offset, curTime, currentlane);
 
                 if (curTime > Info.StartTime)
                     spritePosition = HitPosition;
@@ -428,8 +473,87 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
                 spritePosition = GetSpritePosition(offset, InitialTrackPosition);
             }
 
-            // Update HitBody
-            HitObjectSprite.Y = spritePosition;
+            if (ScrollDirection.Equals(ScrollDirection.Omni))
+            {
+                if (Ruleset.Mode.Equals(GameMode.Keys4))
+                {
+                    switch (currentlane)
+                    {
+                        case 0:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.X = spritePositionX;
+                            //var distance = (float)Math.Sqrt(Math.Pow(GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) - spritePositionX, 2) + Math.Pow(0, 2));
+                            //HitObjectSprite.Size = new ScalableVector2(LongNoteBodySprite.Width + distance, LongNoteBodySprite.Width + distance);
+                            break;
+                        case 1:
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.Y = spritePositionY;
+                            break;
+                        case 2:
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.Y = spritePositionY;
+                            break;
+                        case 3:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.X = spritePositionX;
+                            break;
+                    }
+                    //if (offset != 0)
+                    //    HitObjectSprite.Size = new ScalableVector2(LongNoteBodySprite.Width * (1 * (Info.StartTime / offset)), (LongNoteBodySprite.Width * HitObjectSprite.Image.Height / HitObjectSprite.Image.Width) * (1 * (Info.StartTime / offset)));
+                }
+                else
+                {
+                    var normalization = (float)Math.Sqrt(HitObjectManagerKeys.ScrollSpeed);
+                    switch (currentlane)
+                    {
+                        case 0:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.X = (spritePositionX - (HitPosition * 2f)) * normalization;
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.Y = spritePositionY * normalization;
+                            break;
+                        case 1:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.X = spritePositionX;
+                            break;
+                        case 2:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.X = spritePositionX * normalization;
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.Y = spritePositionY * normalization;
+                            break;
+                        case 3:
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.Y = spritePositionY;
+                            break;
+                        case 4:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.X = (spritePositionX - (HitPosition * 2f)) * normalization;
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, true);
+                            HitObjectSprite.Y = spritePositionY * normalization;
+                            break;
+                        case 5:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.X = spritePositionX;
+                            break;
+                        case 6:
+                            spritePositionX = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.X = spritePositionX * normalization;
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.Y = spritePositionY * normalization;
+                            break;
+                        case 7:
+                            spritePositionY = spritePosition == HitPosition ? HitPosition : GetHorizontalSpritePosition(offset, InitialTrackPosition, false);
+                            HitObjectSprite.Y = spritePositionY;
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                // Update HitBody
+                HitObjectSprite.Y = spritePosition;
+            }
 
             PressHit.UpdateSpritePositions(offset);
             ReleaseHit.UpdateSpritePositions(offset);
@@ -440,14 +564,158 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
 
             //Update HoldBody Position and Size
             LongNoteBodySprite.Height = CurrentLongNoteBodySize;
+            var earliestSpritePosition = 0f;
 
-            var earliestSpritePosition = GetSpritePosition(offset, EarliestTrackPosition);
-            if (ScrollDirection.Equals(ScrollDirection.Down))
-                LongNoteBodySprite.Y = earliestSpritePosition + LongNoteBodyOffset - CurrentLongNoteBodySize;
+            if (ScrollDirection.Equals(ScrollDirection.Omni))
+            {
+                if (Ruleset.Mode.Equals(GameMode.Keys4))
+                {
+                    switch (currentlane)
+                    {
+                        case 0:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+
+                            LongNoteBodySprite.X = earliestSpritePosition - (CurrentLongNoteBodySize / 2f);
+                            LongNoteBodySprite.Rotation = 270;
+
+                            LongNoteEndSprite.X = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true);
+                            LongNoteEndSprite.Rotation = 270;
+                            break;
+                        case 1:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+
+                            LongNoteBodySprite.Y = earliestSpritePosition + (CurrentLongNoteBodySize / 2f);
+                            LongNoteBodySprite.SpriteEffect = SpriteEffects.FlipVertically;
+
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false);
+                            LongNoteEndSprite.SpriteEffect = SpriteEffects.FlipVertically;
+                            break;
+                        case 2:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+
+                            LongNoteBodySprite.Y = earliestSpritePosition - (CurrentLongNoteBodySize / 2f);
+
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true);
+                            break;
+                        case 3:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+
+                            LongNoteBodySprite.X = earliestSpritePosition + (CurrentLongNoteBodySize / 2f);
+                            LongNoteBodySprite.Rotation = 90;
+
+                            LongNoteEndSprite.X = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false);
+                            LongNoteEndSprite.Rotation = 90;
+                            break;
+                    }
+                }
+                else
+                {
+                    var normalization = (float)Math.Sqrt(HitObjectManagerKeys.ScrollSpeed);
+                    switch (currentlane)
+                    {
+                        case 0:
+                            LongNoteBodySprite.Height = (float)Math.Sqrt(Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) - spritePositionX) * normalization, 2) + Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) - spritePositionY) * normalization, 2));
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+                            LongNoteBodySprite.X = (earliestSpritePosition - (CurrentLongNoteBodySize / 2f) - (HitPosition * 2f)) * normalization;
+
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+                            LongNoteBodySprite.Y = (earliestSpritePosition + (CurrentLongNoteBodySize / 2f)) * normalization;
+
+                            LongNoteBodySprite.Rotation = 225;
+
+                            LongNoteEndSprite.X = (GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) - (HitPosition * 2f)) * normalization;
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) * normalization;
+                            LongNoteEndSprite.Rotation = 225;
+                            break;
+                        case 1:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+
+                            LongNoteBodySprite.X = earliestSpritePosition - (CurrentLongNoteBodySize / 2f);
+                            LongNoteBodySprite.Rotation = 270;
+
+                            LongNoteEndSprite.X = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true);
+                            LongNoteEndSprite.Rotation = 270;
+                            break;
+                        case 2:
+                            LongNoteBodySprite.Height = (float)Math.Sqrt(Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) - spritePositionX) * normalization, 2) + Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) - spritePositionY) * normalization, 2));
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+                            LongNoteBodySprite.X = (earliestSpritePosition - (CurrentLongNoteBodySize / 2f)) * normalization;
+
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+                            LongNoteBodySprite.Y = (earliestSpritePosition - (CurrentLongNoteBodySize / 2f)) * normalization;
+
+                            LongNoteBodySprite.Rotation = 315;
+
+                            LongNoteEndSprite.X = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) * normalization;
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) * normalization;
+                            LongNoteEndSprite.Rotation = 315;
+                            break;
+                        case 3:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+
+                            LongNoteBodySprite.Y = earliestSpritePosition - (CurrentLongNoteBodySize / 2f);
+
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true);
+                            break;
+                        case 4:
+                            LongNoteBodySprite.Height = (float)Math.Sqrt(Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) - spritePositionX) * normalization, 2) + Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) - spritePositionY) * normalization, 2));
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+                            LongNoteBodySprite.X = (earliestSpritePosition + (CurrentLongNoteBodySize / 2f) - (HitPosition * 2f)) * normalization;
+
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, true);
+                            LongNoteBodySprite.Y = (earliestSpritePosition - (CurrentLongNoteBodySize / 2f)) * normalization;
+
+                            LongNoteBodySprite.Rotation = 45;
+
+                            LongNoteEndSprite.X = (GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) - (HitPosition * 2f)) * normalization;
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, true) * normalization;
+                            LongNoteEndSprite.Rotation = 45;
+                            break;
+                        case 5:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+
+                            LongNoteBodySprite.X = earliestSpritePosition + (CurrentLongNoteBodySize / 2f);
+                            LongNoteBodySprite.Rotation = 90;
+
+                            LongNoteEndSprite.X = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false);
+                            LongNoteEndSprite.Rotation = 90;
+                            break;
+                        case 6:
+                            LongNoteBodySprite.Height = (float)Math.Sqrt(Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) - spritePositionX) * normalization, 2) + Math.Pow((GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) - spritePositionY) * normalization, 2));
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+                            LongNoteBodySprite.X = (earliestSpritePosition + (CurrentLongNoteBodySize / 2f)) * normalization;
+
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+                            LongNoteBodySprite.Y = (earliestSpritePosition + (CurrentLongNoteBodySize / 2f)) * normalization;
+
+                            LongNoteBodySprite.Rotation = 135;
+
+                            LongNoteEndSprite.X = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) * normalization;
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false) * normalization;
+                            LongNoteEndSprite.Rotation = 135;
+                            break;
+                        case 7:
+                            earliestSpritePosition = GetHorizontalSpritePosition(offset, EarliestTrackPosition, false);
+
+                            LongNoteBodySprite.Y = earliestSpritePosition + (CurrentLongNoteBodySize / 2f);
+                            LongNoteBodySprite.SpriteEffect = SpriteEffects.FlipVertically;
+
+                            LongNoteEndSprite.Y = GetHorizontalEndSpritePosition(offset, EndTrackPosition, false);
+                            LongNoteEndSprite.SpriteEffect = SpriteEffects.FlipVertically;
+                            break;
+                    }
+                }
+            }
             else
-                LongNoteBodySprite.Y = earliestSpritePosition + LongNoteBodyOffset;
+            {
+                earliestSpritePosition = GetSpritePosition(offset, EarliestTrackPosition);
+                if (ScrollDirection.Equals(ScrollDirection.Down))
+                    LongNoteBodySprite.Y = earliestSpritePosition + LongNoteBodyOffset - CurrentLongNoteBodySize;
+                else
+                    LongNoteBodySprite.Y = earliestSpritePosition + LongNoteBodyOffset;
 
-            LongNoteEndSprite.Y = GetEndSpritePosition(offset, EndTrackPosition);
+                LongNoteEndSprite.Y = GetEndSpritePosition(offset, EndTrackPosition);
+            }
 
             // Stop drawing LN body + end if the ln reaches half the height of the hitobject
             // (prevents body + end extending below this point)

@@ -20,6 +20,7 @@ using Quaver.Shared.Graphics;
 using Quaver.Shared.Helpers;
 using Quaver.Shared.Online;
 using Quaver.Shared.Screens.Gameplay.Rulesets.Input;
+using Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects;
 using Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield.Health;
 using Quaver.Shared.Screens.Gameplay.UI;
 using Quaver.Shared.Screens.Gameplay.UI.Health;
@@ -330,6 +331,9 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield
                         Y = Playfield.ReceptorPositionY.Last() + offsetY - Skin.HitPosOffsetY
                     };
                     break;
+                case ScrollDirection.Omni:
+                    y = Playfield.ReceptorPositionY.First() - sizeY + Skin.HitPosOffsetY;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -386,16 +390,174 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield
                 if (scale != 1)
                     posX += (Playfield.LaneSize - Playfield.LaneSize * scale) / 2f;
 
-                // Create individiaul receptor.
-                Receptors.Add(new Sprite
+                // Create individual receptor.
+
+                if (Playfield.ScrollDirections[i].Equals(ScrollDirection.Omni))
                 {
-                    Parent = Playfield.ForegroundContainer,
-                    Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
-                    Position = new ScalableVector2(posX, Playfield.ReceptorPositionY[i]),
-                    Alignment = Alignment.TopLeft,
-                    Image = Skin.NoteReceptorsUp[i],
-                    SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
-                });
+                    if (Playfield.Ruleset.Mode.Equals(GameMode.Keys4))
+                    {
+                        if (i == 0)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 - Playfield.ReceptorPositionY[i], 0),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 1)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0, 0 + Playfield.ReceptorPositionY[i]),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 2)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0, 0 - Playfield.ReceptorPositionY[i]),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 3)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 + Playfield.ReceptorPositionY[i], 0),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                    }
+                    else
+                    {
+                        var normalization = (float)Math.Sqrt(HitObjectManagerKeys.ScrollSpeed);
+                        if (i == 0)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 - Playfield.ReceptorPositionY[i] * normalization, 0 + Playfield.ReceptorPositionY[i] * normalization),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 1)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 - Playfield.ReceptorPositionY[i], 0),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 2)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 - Playfield.ReceptorPositionY[i] * normalization, 0 - Playfield.ReceptorPositionY[i] * normalization),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 3)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0, 0 - Playfield.ReceptorPositionY[i]),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 4)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 + Playfield.ReceptorPositionY[i] * normalization, 0 - Playfield.ReceptorPositionY[i] * normalization),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 5)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 + Playfield.ReceptorPositionY[i], 0),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 6)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0 + Playfield.ReceptorPositionY[i] * normalization, 0 + Playfield.ReceptorPositionY[i] * normalization),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                        else if (i == 7)
+                        {
+                            Receptors.Add(new Sprite
+                            {
+                                Parent = Playfield.ForegroundContainer,
+                                Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                                Position = new ScalableVector2(0, 0 + Playfield.ReceptorPositionY[i]),
+                                Alignment = Alignment.MidCenter,
+                                Image = Skin.NoteReceptorsUp[i],
+                                SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    Receptors.Add(new Sprite
+                    {
+                        Parent = Playfield.ForegroundContainer,
+                        Size = new ScalableVector2(laneSize * scale, (Playfield.LaneSize * Skin.NoteReceptorsUp[i].Height / Skin.NoteReceptorsUp[i].Width) * scale),
+                        Position = new ScalableVector2(posX, Playfield.ReceptorPositionY[i]),
+                        Alignment = Alignment.TopLeft,
+                        Image = Skin.NoteReceptorsUp[i],
+                        SpriteEffect = !Playfield.ScrollDirections[i].Equals(ScrollDirection.Down) && Skin.FlipNoteImagesOnUpscroll ? SpriteEffects.FlipVertically : SpriteEffects.None,
+                    });
+                }
 
                 // Create the column lighting sprite.
                 var size = Skin.ColumnLightingScale * Playfield.LaneSize * ((float)Skin.ColumnLighting.Height / Skin.ColumnLighting.Width);

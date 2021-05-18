@@ -274,6 +274,7 @@ namespace Quaver.Shared.Screens.Selection.UI.Preview
                 switch (scroll.Value)
                 {
                     case ScrollDirection.Down:
+                    case ScrollDirection.Omni:
                     case ScrollDirection.Split:
                         playfield.Container.Alignment = Alignment.BotLeft;
                         playfield.Container.Y = -MenuBorder.HEIGHT - Y;

@@ -299,7 +299,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Input
                 // If the player recieved an early miss or "okay",
                 // show the player that they were inaccurate by killing the object instead of recycling it
                 if (judgement == Judgement.Miss || judgement == Judgement.Okay)
-                    manager.KillHoldPoolObject(gameplayHitObject, judgement == Judgement.Miss);
+                    manager.RecyclePoolObject(gameplayHitObject);
                 else
                     manager.RecyclePoolObject(gameplayHitObject);
 
@@ -335,7 +335,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Input
                 playfield.Stage.JudgementHitBurst.PerformJudgementAnimation(Judgement.Miss);
 
             // Update Object Pool
-            manager.KillHoldPoolObject(gameplayHitObject);
+            manager.RecyclePoolObject(gameplayHitObject);
         }
 
         /// <summary>

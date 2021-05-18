@@ -486,7 +486,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             foreach (var lane in ActiveNoteLanes)
             {
                 foreach (var hitObject in lane)
-                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition, hitObject.Info.Lane - 1);
             }
         }
 
@@ -535,7 +535,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
                     // - missing an LN counts as two misses
                     if (hitObject.Info.IsLongNote)
                     {
-                        KillPoolObject(hitObject);
+                        RecyclePoolObject(hitObject);
 
                         if (im?.ReplayInputManager == null)
                             Ruleset.ScoreProcessor.CalculateScore(Judgement.Miss, true);
@@ -547,7 +547,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
                     // Otherwise just kill the object.
                     else
                     {
-                        KillPoolObject(hitObject);
+                        RecyclePoolObject(hitObject);
                     }
                 }
             }
@@ -564,7 +564,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             foreach (var lane in HeldLongNoteLanes)
             {
                 foreach (var hitObject in lane)
-                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition, hitObject.Info.Lane - 1);
             }
         }
 
@@ -642,7 +642,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             {
                 foreach (var hitObject in lane)
                 {
-                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.UpdateSpritePositions(CurrentTrackPosition, CurrentVisualPosition, hitObject.Info.Lane - 1);
                 }
             }
         }
@@ -659,11 +659,11 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             for (var i = 0; i < ActiveNoteLanes.Count; i++)
             {
                 foreach (var hitObject in ActiveNoteLanes[i])
-                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition, i);
                 foreach (var hitObject in DeadNoteLanes[i])
-                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition, i);
                 foreach (var hitObject in HeldLongNoteLanes[i])
-                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition);
+                    hitObject.ForceUpdateLongnote(CurrentTrackPosition, CurrentVisualPosition, i);
             }
         }
 
@@ -699,7 +699,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             if (lane.Count > 0)
             {
                 var info = lane.Dequeue();
-                gameplayHitObject.InitializeObject(this, info);
+                gameplayHitObject.InitializeObject(this, info, gameplayHitObject.Info.Lane);
                 ActiveNoteLanes[info.Lane - 1].Enqueue(gameplayHitObject);
             }
             else
@@ -728,7 +728,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             // Change start time and LN size.
             gameplayHitObject.InitialTrackPosition = GetPositionFromTime(CurrentVisualPosition);
             gameplayHitObject.CurrentlyBeingHeld = false;
-            gameplayHitObject.UpdateLongNoteSize(CurrentTrackPosition, CurrentVisualPosition);
+            gameplayHitObject.UpdateLongNoteSize(CurrentTrackPosition, CurrentVisualPosition, gameplayHitObject.Info.Lane - 1);
 
             if (setTint)
                 gameplayHitObject.Kill();

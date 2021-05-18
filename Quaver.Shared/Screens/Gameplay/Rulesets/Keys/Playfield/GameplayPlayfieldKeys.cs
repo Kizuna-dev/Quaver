@@ -257,6 +257,16 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield
                 return;
             }
 
+            if (direction.Equals(ScrollDirection.Omni))
+            {
+                ScrollDirections = new ScrollDirection[keys];
+                for (var i = 0; i < keys; i++)
+                {
+                    ScrollDirections[i] = ScrollDirection.Omni;
+                }
+                return;
+            }
+
             // Case: Config = Down/Up Scroll
             ScrollDirections = Enumerable.Repeat(direction, keys).ToArray();
         }
@@ -297,6 +307,122 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield
 
                 switch (ScrollDirections[i])
                 {
+                    case ScrollDirection.Omni:
+                        if (Ruleset.Mode.Equals(GameMode.Keys4))
+                        {
+                            if (i == 0)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = -ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = ReceptorPositionY[i] + skin.HitPosOffsetY;
+                            }
+                            else if (i == 1)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = ReceptorPositionY[i] + skin.HitPosOffsetY;
+                            }
+                            else if (i == 2)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = -ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = ReceptorPositionY[i] + skin.HitPosOffsetY;
+                            }
+                            else if (i == 3)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = ReceptorPositionY[i] + skin.HitPosOffsetY;
+                            }
+                        }
+                        else
+                        {
+                            if (i == 0)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 1)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = -ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 2)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = -ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 3)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = -ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 4)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = -ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = -ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 5)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 6)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                            else if (i == 7)
+                            {
+                                ReceptorPositionY[i] = skin.ReceptorPosOffsetY + receptorOffset;
+                                HitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                HoldEndHitPositionY[i] = ReceptorPositionY[i] - skin.HitPosOffsetY + receptorOffset;
+                                ColumnLightingPositionY[i] = ReceptorPositionY[i] + receptorOffset + skin.ColumnLightingOffsetY;
+                                TimingLinePositionY[i] = HitPositionY[i];
+                            }
+                        }
+                        break;
                     case ScrollDirection.Down:
                         ReceptorPositionY[i] = WindowManager.Height - skin.ReceptorPosOffsetY - receptorOffset;
                         ColumnLightingPositionY[i] = ReceptorPositionY[i] - skin.ColumnLightingOffsetY - skin.ColumnLightingScale * LaneSize * skin.ColumnLighting.Height / skin.ColumnLighting.Width;
